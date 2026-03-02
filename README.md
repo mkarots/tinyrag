@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/logo.png" alt="tinyrag logo" width="500">
+  <img src="assets/logo.png" alt="tinyrag logo" width="800">
 </div>
 
 # tinyrag
