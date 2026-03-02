@@ -1,0 +1,139 @@
+method:
+  pc:
+    phase: conception
+    iteration: 1
+    step: define
+  concern_definitions:
+    scope:
+      description: the boundary of what the project does and does not do
+      states:
+      - fluid
+      - narrowing
+      - locked
+      - reconsidering
+      rules:
+      - scope must be explicitly stated in every project
+      - scope changes are only permitted during conception and review phases
+      - during sprint, scope is locked — new ideas go to BACKLOG.md
+      - scope must be defined in terms of what is IN and what is OUT
+    documentation:
+      description: all written artifacts that make the project understandable, usable, and maintainable
+      states:
+      - not_started
+      - drafting
+      - in_progress
+      - complete
+      - stale
+      rules:
+      - only documented software should be delivered
+      - documentation gates development — no feature ships without docs
+      - each project must have at minimum WHY.md, README.md, ROADMAP.md
+      - documentation must be reviewed for staleness at every review phase
+      - documentation is a first-class deliverable, not an afterthought
+    development:
+      description: all code, configuration, and infrastructure work
+      states:
+      - blocked
+      - not_started
+      - prototyping
+      - active
+      - stabilising
+      - complete
+      rules:
+      - development is not allowed in conception phase
+      - development in design phase is limited to throwaway prototypes
+      - development in sprint phase must follow the roadmap — no unplanned work
+      - development must produce deployable output at the end of each sprint
+      - development is gated by documentation — build it, then document it, then communicate it
+    communication:
+      description: all external-facing announcements, posts, updates, and promotion of the project
+      states:
+      - not_applicable
+      - pending
+      - drafting
+      - published
+      rules:
+      - every delivered and documented feature must be communicated
+      - communication is the final step in the sprint loop — it cannot be skipped
+      - communication is not marketing fluff — it is a factual account of what changed and why
+      - no communication without documentation — you cannot announce what is not written down
+      - communication debt is project debt — uncommunicated features are invisible features
+    operations:
+      description: all work related to deploying, running, monitoring, and maintaining the project
+      states:
+      - not_applicable
+      - not_started
+      - defining
+      - active
+      - reviewing
+      rules:
+      - operations strategy must be defined during design phase
+      - the project must be in a deployable state at the end of every sprint
+      - operational health must be assessed during every review phase
+      - operations includes CI/CD, monitoring, hosting, incident response
+      - if the project cannot be operated, it cannot be delivered
+    feedback:
+      description: all signals — internal or external — about how the project is performing against its goals
+      states:
+      - not_applicable
+      - not_started
+      - collecting
+      - synthesising
+      - actioned
+      rules:
+      - feedback must be actively sought, not passively received
+      - feedback is collected during sprint, synthesised during review
+      - feedback that challenges scope must be logged and deferred to review phase
+      - feedback drives the decision at the end of review — next sprint, harden, expand, or kill
+      - absence of feedback is itself feedback — it means no one is using it
+  concerns:
+    scope: fluid
+    documentation: not_started
+    development: not_started
+    communication: not_applicable
+    operations: not_applicable
+    feedback: not_started
+  sequence:
+    conception:
+      status: active
+      iteration: 1
+      loop: define → challenge → refine
+      exit: motivation, problem, and scope are stable enough to design against
+      addresses:
+      - motivation
+      - problem_definition
+      - scope
+      artifacts:
+      - WHY.md
+      - README.md
+    design:
+      status: pending
+      iteration: 0
+      loop: sketch → evaluate → revise
+      exit: technical design and roadmap are concrete enough to build against
+      addresses:
+      - technical_design
+      - roadmap
+      artifacts:
+      - SYSTEM_SPEC.md
+      - ROADMAP.md
+    sprint:
+      status: pending
+      iteration: 0
+      loop: build → document → communicate
+      exit: feature is delivered, documented, and communicated
+      addresses:
+      - development
+      - documentation
+      - communication
+      artifacts:
+      - CHANGELOG.md
+    review:
+      status: pending
+      iteration: 0
+      loop: measure → assess → decide
+      exit: decision made — next sprint, hardening, or expansion
+      addresses:
+      - feedback
+      - operations
+      artifacts: []
