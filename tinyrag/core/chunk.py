@@ -7,13 +7,13 @@ from typing import Any, Dict, Optional
 @dataclass
 class Chunk:
     """Represents a text chunk with metadata."""
-    
+
     text: str
     source: str
     index: int
     metadata: Dict[str, Any] = field(default_factory=dict)
     score: Optional[float] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert chunk to dictionary."""
         return {
@@ -23,7 +23,7 @@ class Chunk:
             "metadata": self.metadata,
             "score": self.score,
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Chunk":
         """Create chunk from dictionary."""

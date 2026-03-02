@@ -2,8 +2,8 @@
 
 __version__ = "0.1.0"
 
-from tinyrag.core.rag import TinyRAG
-from tinyrag.core.chunk import Chunk
 from tinyrag.config.config import TinyRAGConfig
+from tinyrag.core.chunk import Chunk
+from tinyrag.core.rag import TinyRAG
 
 __all__ = ["TinyRAG", "Chunk", "TinyRAGConfig"]

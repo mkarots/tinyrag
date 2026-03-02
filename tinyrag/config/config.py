@@ -1,17 +1,17 @@
 """Configuration classes."""
 
 from dataclasses import dataclass, field
-from typing import Dict, Any, Optional
+from typing import Any, Dict
 
 
 @dataclass
 class ChunkingConfig:
     """Configuration for text chunking."""
-    
+
     size: int = 512
     overlap: int = 50
     strategy: str = "sentence-aware"
-    
+
     def validate(self) -> None:
         """Validate chunking configuration.
         
@@ -32,10 +32,10 @@ class ChunkingConfig:
 class TinyRAGConfig:
     """Main configuration class."""
     """Main configuration class."""
-    
+
     chunking: ChunkingConfig = field(default_factory=ChunkingConfig)
     custom_metadata: Dict[str, Any] = field(default_factory=dict)
-    
+
     def validate(self) -> None:
         """Validate entire configuration.
         

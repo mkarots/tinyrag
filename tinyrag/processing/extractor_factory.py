@@ -1,10 +1,9 @@
 """Factory for document extractors."""
 
-from pathlib import Path
 from typing import List
 
+from tinyrag.processing.extractors import MarkdownExtractor, TextExtractor
 from tinyrag.processing.interfaces import DocumentExtractor
-from tinyrag.processing.extractors import TextExtractor, MarkdownExtractor
 
 
 def create_extractor(file_path: str, extractors: List[DocumentExtractor] = None) -> DocumentExtractor:
@@ -25,9 +24,9 @@ def create_extractor(file_path: str, extractors: List[DocumentExtractor] = None)
             MarkdownExtractor(),
             TextExtractor(),
         ]
-    
+
     for extractor in extractors:
         if extractor.can_extract(file_path):
             return extractor
-    
+
     raise ValueError(f"No extractor found for file: {file_path}")

@@ -2,14 +2,14 @@
 
 from typing import List, Optional
 
-from tinyrag.core.chunk import Chunk
-from tinyrag.processing.interfaces import DocumentExtractor, Chunker
 from tinyrag.config.config import TinyRAGConfig
+from tinyrag.core.chunk import Chunk
+from tinyrag.processing.interfaces import Chunker, DocumentExtractor
 
 
 class TinyRAG:
     """Main RAG orchestrator class."""
-    
+
     def __init__(
         self,
         chunks: List[Chunk],
@@ -23,7 +23,7 @@ class TinyRAG:
         """
         self.chunks = chunks
         self.config = config
-    
+
     @classmethod
     def from_files(
         cls,
@@ -45,34 +45,34 @@ class TinyRAG:
         """
         if config is None:
             config = TinyRAGConfig()
-        
+
         config.validate()
-        
+
         # This is a skeleton - will be completed in Milestone 2
         # For now, just extract and chunk
-        from tinyrag.processing.extractor_factory import create_extractor
         from tinyrag.processing.chunker import SentenceAwareChunker
-        
+        from tinyrag.processing.extractor_factory import create_extractor
+
         all_chunks = []
-        
+
         for file_path in files:
             if document_extractor is None:
                 extractor = create_extractor(file_path)
             else:
                 extractor = document_extractor
-            
+
             text = extractor.extract(file_path)
-            
+
             if chunker is None:
                 chunker_instance = SentenceAwareChunker(config.chunking)
             else:
                 chunker_instance = chunker
-            
+
             chunks = chunker_instance.chunk(text, metadata={"source": file_path})
             all_chunks.extend(chunks)
-        
+
         return cls(chunks=all_chunks, config=config)
-    
+
     def get_all_chunks(self) -> List[Chunk]:
         """Get all chunks.
         
