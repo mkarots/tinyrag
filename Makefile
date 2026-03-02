@@ -1,5 +1,9 @@
 .PHONY: help install install-dev test test-unit test-integration test-e2e lint format type-check coverage clean build dist ci
 
+# Detect Python/pip command
+PYTHON := $(shell which python3 || which python)
+PIP := $(PYTHON) -m pip
+
 help:
 	@echo "Available targets:"
 	@echo "  install          - Install package and dependencies"
@@ -16,37 +20,41 @@ help:
 	@echo "  build           - Build package"
 	@echo "  dist            - Create distribution"
 	@echo "  ci              - Run full CI pipeline"
+	@echo ""
+	@echo "Using Python: $(PYTHON)"
+	@echo "Using pip: $(PIP)"
 
 install:
-	pip install -e .
+	$(PIP) install -e .
 
 install-dev:
-	pip install -e ".[dev,all]"
+	$(PIP) install --upgrade pip
+	$(PIP) install -e ".[dev,all]"
 
 test:
-	pytest
+	$(PYTHON) -m pytest
 
 test-unit:
-	pytest -m unit
+	$(PYTHON) -m pytest -m unit
 
 test-integration:
-	pytest -m integration
+	$(PYTHON) -m pytest -m integration
 
 test-e2e:
-	pytest -m e2e
+	$(PYTHON) -m pytest -m e2e
 
 lint:
-	ruff check tinyrag tests
+	$(PYTHON) -m ruff check tinyrag tests
 
 format:
-	black tinyrag tests
-	ruff check --fix tinyrag tests
+	$(PYTHON) -m black tinyrag tests
+	$(PYTHON) -m ruff check --fix tinyrag tests
 
 type-check:
-	mypy tinyrag
+	$(PYTHON) -m mypy tinyrag
 
 coverage:
-	pytest --cov=tinyrag --cov-report=html --cov-report=term-missing
+	$(PYTHON) -m pytest --cov=tinyrag --cov-report=html --cov-report=term-missing
 	@echo "Coverage report generated in htmlcov/index.html"
 
 clean:
@@ -59,11 +67,11 @@ clean:
 	rm -rf htmlcov/
 	rm -rf .coverage
 	rm -rf coverage.xml
-	find . -type d -name __pycache__ -exec rm -r {} +
-	find . -type f -name "*.pyc" -delete
+	find . -type d -name __pycache__ -exec rm -r {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete 2>/dev/null || true
 
 build: clean
-	python -m build
+	$(PYTHON) -m build
 
 dist: build
 	@echo "Distribution created in dist/"
