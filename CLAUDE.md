@@ -559,7 +559,7 @@ def extract(self, file_path: str) -> str:
 All code must work with:
 
 ```bash
-make install-dev     # Install with dev dependencies
+make install-dev     # Install with dev dependencies (uses python3 -m pip)
 make lint           # Run linters (must pass)
 make format         # Format code (must pass)
 make type-check     # Type checking (should pass)
@@ -569,6 +569,8 @@ make test-integration # Integration tests
 make test-e2e       # E2E tests
 make ci             # Full CI pipeline
 ```
+
+**Note:** The Makefile auto-detects Python (`python3` or `python`) and uses `python -m pip` for reliability. Run `make help` to see which Python/pip is being used.
 
 ### GitHub Actions
 
