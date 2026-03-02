@@ -75,5 +75,5 @@ jobs:
     
     - name: Check distribution
       run: |
-        uv pip install dist/*.whl
-        uv run python -c "import tinyrag; print(tinyrag.__version__)"
+        uv pip install --system dist/*.whl
+        python -c "import tinyrag; print(tinyrag.__version__)"
