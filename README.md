@@ -36,11 +36,11 @@ from tinyrag import TinyRAG
 # Create from files
 rag = TinyRAG.from_files(["doc.txt", "notes.md"])
 
-# Get chunks
-chunks = rag.get_all_chunks()
+# Search for relevant chunks
+results = rag.search("what is X?", top_k=5)
 
-# Search (coming in Milestone 2)
-# results = rag.search("what is X?", top_k=5)
+# Get all chunks
+chunks = rag.get_all_chunks()
 
 # Save portable file (coming in Milestone 3)
 # rag.save("knowledge.tinyrag")
@@ -64,15 +64,16 @@ make install-dev
 
 ## Features
 
-**Current (Milestone 1):**
+**Current (Milestone 2):**
 - ✅ Extract text from .txt and .md files
 - ✅ Intelligent chunking with sentence awareness
+- ✅ Local embeddings (sentence-transformers)
+- ✅ Vector search (FAISS)
+- ✅ Semantic search API
 - ✅ SOLID architecture with clear interfaces
 
 **Coming Soon:**
 - 🔜 Portable `.tinyrag` file format
-- 🔜 Local embeddings (sentence-transformers)
-- 🔜 Vector search (FAISS)
 - 🔜 Save/load operations
 - 🔜 PDF, HTML, DOCX support
 
@@ -113,8 +114,8 @@ See [docs/proposals/ARCHITECTURE.md](docs/proposals/ARCHITECTURE.md) for details
 
 ## Status
 
-**Milestone 1 Complete** - Foundation & Core Structure  
-**Milestone 2 In Progress** - Embeddings & Vector Store
+**Milestone 2 Complete** - Embeddings & Vector Store  
+**Milestone 3 In Progress** - Portable File Format
 
 See [plans/FINAL_PLAN.md](plans/FINAL_PLAN.md) for roadmap.
 
