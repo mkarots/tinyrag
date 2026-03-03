@@ -108,6 +108,16 @@ warn_unused_ignores = true
 warn_no_return = true
 strict_optional = true
 
+# Exclude third-party libraries without type stubs or with Python 3.10+ syntax
+[[tool.mypy.overrides]]
+module = [
+    "faiss.*",
+    "torch.*",
+    "sentence_transformers.*",
+]
+ignore_missing_imports = true
+follow_imports = "skip"  # Don't check source files of these modules
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

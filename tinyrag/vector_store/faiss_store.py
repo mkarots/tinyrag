@@ -1,6 +1,6 @@
 """FAISS vector store implementation."""
 
-import faiss
+import faiss  # type: ignore[import-untyped, unused-ignore]
 import numpy as np
 
 from tinyrag.config.config import SearchConfig
@@ -108,4 +108,4 @@ class FAISSVectorStore(VectorStore):
         Returns:
             Number of vectors in the store
         """
-        return self.index.ntotal
+        return int(self.index.ntotal)  # type: ignore[no-any-return]
