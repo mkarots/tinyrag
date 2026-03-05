@@ -9,7 +9,7 @@ from raglet.vector_store.interfaces import VectorStore
 
 
 class FAISSVectorStore(VectorStore):
-    """Vector store using FAISS IndexFlatL2."""
+    """Vector store using FAISS with cosine similarity (IndexFlatIP)."""
 
     def __init__(self, embedding_dim: int, config: SearchConfig):
         """Initialize FAISS vector store.
@@ -21,13 +21,10 @@ class FAISSVectorStore(VectorStore):
         self.config = config
         self.config.validate()
 
-        if config.index_type != "flat_l2":
-            raise ValueError(
-                f"Unsupported index_type: {config.index_type}. " "Only 'flat_l2' is supported."
-            )
-
         self.embedding_dim = embedding_dim
-        self.index = faiss.IndexFlatL2(embedding_dim)
+        
+        # IndexFlatIP (Inner Product) with normalized vectors = cosine similarity
+        self.index = faiss.IndexFlatIP(embedding_dim)
         self.chunks: list[Chunk] = []
 
     def add_vectors(self, vectors: np.ndarray, chunks: list[Chunk]) -> None:
@@ -53,6 +50,9 @@ class FAISSVectorStore(VectorStore):
 
         # Ensure vectors are float32 and contiguous (FAISS requirement)
         vectors = np.ascontiguousarray(vectors.astype(np.float32))
+
+        # Normalize vectors for cosine similarity (IndexFlatIP)
+        faiss.normalize_L2(vectors)
 
         self.index.add(vectors)
         self.chunks.extend(chunks)
@@ -80,23 +80,30 @@ class FAISSVectorStore(VectorStore):
         # Ensure query is float32 and contiguous
         query_vector = np.ascontiguousarray(query_vector.astype(np.float32)).reshape(1, -1)
 
-        # Search returns distances and indices
-        distances, indices = self.index.search(query_vector, top_k)
+        # Normalize query vector for cosine similarity (IndexFlatIP)
+        faiss.normalize_L2(query_vector)
 
-        # Convert distances to similarity scores (lower distance = higher similarity)
-        # For L2 distance, we'll use negative distance as score
-        # (closer = better, so negative distance means higher score)
+        # Search returns inner product scores (cosine similarity) and indices
+        similarities, indices = self.index.search(query_vector, top_k)
+
+        # Inner product with normalized vectors = cosine similarity (0-1 range)
         results = []
         for i, idx in enumerate(indices[0]):
-            if idx < len(self.chunks):
+            # FAISS returns -1 for invalid indices when there aren't enough vectors
+            if idx >= 0 and idx < len(self.chunks):
                 chunk = self.chunks[idx]
+                
+                # Inner product is already similarity score (higher = more similar)
+                # Range: -1.0 to 1.0 (typically 0.0 to 1.0 for normalized vectors)
+                score = float(similarities[0][i])
+                
                 # Create a copy with score set
                 result_chunk = Chunk(
                     text=chunk.text,
                     source=chunk.source,
                     index=chunk.index,
                     metadata=chunk.metadata.copy(),
-                    score=float(-distances[0][i]),  # Negative distance as score
+                    score=score,
                 )
                 results.append(result_chunk)
 

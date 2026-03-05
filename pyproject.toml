@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "raglet"
-version = "0.1.0"
+version = "0.2.0"
 description = "Portable memory for small text corpora - create searchable .raglet files"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -35,6 +35,9 @@ dependencies = [
     "sentence-transformers>=2.2.0",
     "faiss-cpu>=1.7.4",
 ]
+
+[project.scripts]
+raglet = "raglet.cli:main"
 
 [project.optional-dependencies]
 dev = [

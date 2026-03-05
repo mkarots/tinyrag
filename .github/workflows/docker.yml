@@ -1,0 +1,84 @@
+name: Docker Build and Push
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v0.1.0
+  release:
+    types: [published]  # Trigger on GitHub releases
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  DOCKER_IMAGE: mkarots/raglet
+  REGISTRY: docker.io
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract version from pyproject.toml
+        id: version
+        run: |
+          VERSION=$(grep '^version =' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+
+      - name: Determine tags
+        id: tags
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          GIT_TAG="${GITHUB_REF#refs/tags/}"
+          
+          # If triggered by tag, use tag version (strip 'v' prefix if present)
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG_VERSION="${GIT_TAG#v}"
+            echo "tag_version=$TAG_VERSION" >> $GITHUB_OUTPUT
+            echo "Using tag version: $TAG_VERSION"
+          elif [[ "${{ github.event.release.tag_name }}" != "" ]]; then
+            # If triggered by release, use release tag (strip 'v' prefix)
+            RELEASE_TAG="${{ github.event.release.tag_name }}"
+            TAG_VERSION="${RELEASE_TAG#v}"
+            echo "tag_version=$TAG_VERSION" >> $GITHUB_OUTPUT
+            echo "Using release tag version: $TAG_VERSION"
+          else
+            # Otherwise use version from pyproject.toml
+            echo "tag_version=$VERSION" >> $GITHUB_OUTPUT
+            echo "Using pyproject.toml version: $VERSION"
+          fi
+          
+          # Build tags string (comma-separated, no spaces)
+          TAG_VERSION="${{ steps.tags.outputs.tag_version }}"
+          TAGS="${{ env.DOCKER_IMAGE }}:${TAG_VERSION},${{ env.DOCKER_IMAGE }}:latest"
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "Tags: ${TAGS}"
+
+      - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+      - name: Image digest
+        run: echo "Image pushed with digest: ${{ steps.build.outputs.digest }}"

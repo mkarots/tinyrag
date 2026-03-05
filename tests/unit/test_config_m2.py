@@ -54,7 +54,7 @@ class TestSearchConfig:
         config = SearchConfig()
         assert config.default_top_k == 5
         assert config.similarity_threshold is None
-        assert config.index_type == "flat_l2"
+        assert config.index_type == "flat_ip"
 
     def test_validation_success(self):
         """Test successful validation."""

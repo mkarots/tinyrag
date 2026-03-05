@@ -30,6 +30,8 @@ raglet is **portable memory**. It takes small context and turns it into a single
 
 ## Quick Start
 
+### Python Library
+
 ```python
 from raglet import RAGlet
 
@@ -42,15 +44,64 @@ results = rag.search("what is X?", top_k=5)
 # Get all chunks
 chunks = rag.get_all_chunks()
 
-# Save portable file (coming in Milestone 3)
-# rag.save("knowledge.raglet")
+# Save to directory (default format)
+rag.save(".raglet/")
+
+# Load later
+rag = RAGlet.load(".raglet/")
 ```
 
+### Docker CLI
+
+**The ultimate flex:** Run raglet instantly against any workspace:
+
+```bash
+# Build knowledge base from workspace
+docker run -v /path/to/project:/workspace mkarots/raglet \
+  --workspace /workspace build
+
+# Query knowledge base
+docker run -v /path/to/project:/workspace mkarots/raglet \
+  --workspace /workspace query "what is Python?" --top-k 10
+
+# Chat with Claude API (uses raglet context)
+docker run -v /path/to/project:/workspace -e ANTHROPIC_API_KEY=your-key mkarots/raglet \
+  --workspace /workspace chat "explain Python" --top-k 5
+
+# Add files incrementally
+docker run -v /path/to/project:/workspace mkarots/raglet \
+  --workspace /workspace add new_file.txt
+
+# Inspect knowledge base
+docker run -v /path/to/project:/workspace mkarots/raglet \
+  --workspace /workspace inspect
+
+# Export to zip for sharing
+docker run -v /path/to/project:/workspace mkarots/raglet \
+  --workspace /workspace export --output knowledge.zip
+```
+
+**Knowledge base lives in `.raglet/` directory** - mount your workspace and it just works!
+
 ## Installation
+
+### Python Package
 
 ```bash
 pip install raglet
 ```
+
+### Docker Image
+
+```bash
+# Pull from Docker Hub
+docker pull mkarots/raglet
+
+# Or build locally
+docker build -t mkarots/raglet .
+```
+
+### Development
 
 For development (requires [uv](https://github.com/astral-sh/uv)):
 
@@ -64,26 +115,30 @@ make install-dev
 
 ## Features
 
-**Current (Milestone 2):**
+**Current:**
 - ✅ Extract text from .txt and .md files
 - ✅ Intelligent chunking with sentence awareness
 - ✅ Local embeddings (sentence-transformers)
 - ✅ Vector search (FAISS)
 - ✅ Semantic search API
+- ✅ Portable directory format (`.raglet/`)
+- ✅ Save/load operations
+- ✅ Incremental updates
+- ✅ CLI interface
+- ✅ Docker image
 - ✅ SOLID architecture with clear interfaces
 
 **Coming Soon:**
-- 🔜 Portable `.raglet` file format
-- 🔜 Save/load operations
 - 🔜 PDF, HTML, DOCX support
+- 🔜 Zip export format
 
 ## Principles
 
-1. **Portable** - One `.raglet` file. Save it, git commit it, email it
+1. **Portable** - One `.raglet/` directory. Save it, git commit it, email it (or export to zip)
 2. **Small by design** - Workspace-scale (codebases, conversations, notes). Not the internet
 3. **Retrieval only** - raglet finds chunks. You decide what to do with them. Bring your own LLM
-4. **Open format** - The `.raglet` file is easily decodable. Embeddings are extractable. No lock-in
-5. **Zero infrastructure** - `pip install raglet`. That's it
+4. **Open format** - The `.raglet/` directory is easily inspectable (JSON files). Embeddings are extractable. No lock-in
+5. **Zero infrastructure** - `pip install raglet` or `docker run mkarots/raglet`. That's it
 
 ## Development
 
@@ -114,8 +169,8 @@ See [docs/proposals/ARCHITECTURE.md](docs/proposals/ARCHITECTURE.md) for details
 
 ## Status
 
-**Milestone 2 Complete** - Embeddings & Vector Store  
-**Milestone 3 In Progress** - Portable File Format
+**Milestone 3 Complete** - Portable File Format & CLI  
+**Ready for Use** - Directory format, Docker image, CLI interface
 
 See [plans/FINAL_PLAN.md](plans/FINAL_PLAN.md) for roadmap.
 

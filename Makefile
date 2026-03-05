@@ -1,4 +1,4 @@
-.PHONY: help install install-dev test test-unit test-integration test-e2e lint format format-check type-check coverage coverage-ci clean build dist publish publish-test ci venv check-uv
+.PHONY: help install install-dev test test-unit test-integration test-e2e lint format format-check type-check coverage coverage-ci clean build dist publish publish-test ci venv check-uv benchmark docker-build docker-push docker-release
 
 
 # Check if uv is available (checks at runtime, works even if uv was installed after Makefile was parsed)
@@ -14,9 +14,11 @@ help:
 	@echo "  install          - Install package and dependencies"
 	@echo "  install-dev     - Install package with dev dependencies"
 	@echo "  test            - Run all tests"
+	@echo "  test-debug      - Run tests with output visible (-s -v flags)"
 	@echo "  test-unit       - Run unit tests only"
 	@echo "  test-integration - Run integration tests only"
 	@echo "  test-e2e        - Run end-to-end tests only"
+	@echo "  benchmark       - Benchmark embedding models (speed & accuracy)"
 	@echo "  lint            - Run linters (ruff)"
 	@echo "  format          - Format code (black)"
 	@echo "  format-check    - Check formatting without modifying"
@@ -28,6 +30,9 @@ help:
 	@echo "  dist            - Create distribution"
 	@echo "  publish-test    - Publish to TestPyPI (requires twine)"
 	@echo "  publish         - Publish to PyPI (requires twine)"
+	@echo "  docker-build    - Build Docker image (local)"
+	@echo "  docker-push      - Push Docker image to Docker Hub (requires docker login)"
+	@echo "  docker-release  - Build and push Docker image with version tag"
 	@echo "  ci              - Run full CI pipeline"
 	@echo ""
 	@if command -v uv >/dev/null 2>&1; then \
@@ -65,14 +70,25 @@ install-dev: venv check-uv
 test: check-uv
 	uv run pytest
 
+test-debug: check-uv
+	@echo "Running tests with output visible (use -s flag)..."
+	uv run pytest -s -v
+
 test-unit: check-uv
 	uv run pytest -m unit
 
 test-integration: check-uv
 	uv run pytest -m integration
 
+test-integration-debug: check-uv
+	uv run pytest -m integration -s -v
+
 test-e2e: check-uv
 	uv run pytest -m e2e
+
+benchmark: check-uv
+	@echo "Running embedding model benchmarks..."
+	uv run python scripts/benchmark_models.py
 
 lint: check-uv
 	uv run ruff check raglet tests
@@ -124,3 +140,27 @@ publish: build check-uv
 
 ci: lint type-check test
 	@echo "CI pipeline completed successfully"
+
+# Docker commands
+DOCKER_IMAGE := mkarots/raglet
+VERSION := $(shell grep '^version =' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+
+docker-build: check-uv
+	@echo "Building Docker image: $(DOCKER_IMAGE):$(VERSION)"
+	docker build -t $(DOCKER_IMAGE):$(VERSION) .
+	docker tag $(DOCKER_IMAGE):$(VERSION) $(DOCKER_IMAGE):latest
+	@echo "✓ Build complete: $(DOCKER_IMAGE):$(VERSION) and $(DOCKER_IMAGE):latest"
+
+docker-push: docker-build
+	@echo "Pushing Docker image to Docker Hub..."
+	@if ! docker info >/dev/null 2>&1; then \
+		echo "Error: Docker daemon not running or not logged in"; \
+		echo "Run: docker login"; \
+		exit 1; \
+	fi
+	docker push $(DOCKER_IMAGE):$(VERSION)
+	docker push $(DOCKER_IMAGE):latest
+	@echo "✓ Pushed $(DOCKER_IMAGE):$(VERSION) and $(DOCKER_IMAGE):latest"
+
+docker-release: docker-push
+	@echo "✓ Docker release complete: $(DOCKER_IMAGE):$(VERSION)"
