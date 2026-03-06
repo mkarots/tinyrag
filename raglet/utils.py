@@ -2,13 +2,14 @@
 
 import glob
 from pathlib import Path
+from typing import Optional
 
 from raglet.core.rag import DEFAULT_IGNORE_PATTERNS
 
 
 def expand_file_inputs(
     inputs: list[str],
-    ignore_patterns: list[str] | None = None,
+    ignore_patterns: Optional[list[str]] = None,
 ) -> list[str]:
     """Expand file inputs (files, directories, glob patterns) into a list of files.
 

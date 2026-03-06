@@ -561,6 +561,16 @@ class RAGlet:
 
         return DirectoryStorageBackend()
 
+    def _save_on_exit(self) -> None:
+        """Save any unsaved changes when the program exits."""
+        if self._auto_save_path and self._unsaved_chars > 0:
+            try:
+                self.save(self._auto_save_path, incremental=True)
+            except Exception:
+                # Silently fail on exit - can't do much about it
+                pass
+        self._unsaved_chars = 0
+
     def _get_default_backend(self, file_path: str) -> "StorageBackend":
         """Get default storage backend.
 

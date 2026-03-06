@@ -15,7 +15,7 @@ import numpy as np
 try:
     from sentence_transformers import SentenceTransformer
 except ImportError:
-    SentenceTransformer = None  # type: ignore[assignment, misc]
+    SentenceTransformer = None
 
 from raglet.config.config import EmbeddingConfig
 from raglet.core.chunk import Chunk

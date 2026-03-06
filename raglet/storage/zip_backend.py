@@ -5,6 +5,7 @@ import json
 import tempfile
 import zipfile
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 
@@ -134,7 +135,7 @@ class ZipStorageBackend(StorageBackend):
         file_path: str,
         chunks: list[Chunk],
         embeddings: np.ndarray,
-        raglet: RAGlet,
+        raglet: Optional[RAGlet] = None,
     ) -> None:
         """Add chunks incrementally.
 

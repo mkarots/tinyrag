@@ -2,7 +2,7 @@
 
 import json
 import sqlite3
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -86,7 +86,7 @@ class SQLiteStorageBackend(StorageBackend):
         )
         conn.execute(
             "INSERT INTO metadata (key, value) VALUES (?, ?)",
-            ("created_at", datetime.now(UTC).isoformat().replace("+00:00", "Z")),
+            ("created_at", datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")),
         )
         conn.execute(
             "INSERT INTO metadata (key, value) VALUES (?, ?)",
@@ -196,16 +196,17 @@ class SQLiteStorageBackend(StorageBackend):
         embedding_dim = int(row[0])
 
         # Load all embeddings
-        embeddings_list = []
+        embeddings_list: list[np.ndarray] = []
         for row in conn.execute("SELECT embedding FROM embeddings ORDER BY chunk_id"):
             embedding_bytes = row[0]
             embedding_array = np.frombuffer(embedding_bytes, dtype=np.float32)
             embeddings_list.append(embedding_array)
 
         if not embeddings_list:
-            return np.array([]).reshape(0, embedding_dim)
+            empty_array: np.ndarray = np.array([]).reshape(0, embedding_dim).astype(np.float32)
+            return empty_array
 
-        embeddings = np.vstack(embeddings_list)
+        embeddings: np.ndarray = np.vstack(embeddings_list).astype(np.float32)
         return embeddings
 
     def save(

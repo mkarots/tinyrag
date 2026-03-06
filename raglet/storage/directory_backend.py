@@ -1,7 +1,7 @@
 """Directory storage backend implementation."""
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -81,8 +81,8 @@ class DirectoryStorageBackend(StorageBackend):
         metadata_path = dir_path / "metadata.json"
         metadata = {
             "version": self.VERSION,
-            "created_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
-            "updated_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+            "created_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "updated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "chunk_count": len(raglet.chunks),
             "embedding_dim": (
                 raglet.embeddings.shape[1]
@@ -158,9 +158,9 @@ class DirectoryStorageBackend(StorageBackend):
             metadata = {}
 
         metadata["chunk_count"] = len(updated_chunks)
-        metadata["updated_at"] = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        metadata["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         if "created_at" not in metadata:
-            metadata["created_at"] = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+            metadata["created_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         if "version" not in metadata:
             metadata["version"] = self.VERSION
 
@@ -329,9 +329,9 @@ class DirectoryStorageBackend(StorageBackend):
             metadata = {}
 
         metadata["chunk_count"] = len(updated_chunks)
-        metadata["updated_at"] = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        metadata["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         if "created_at" not in metadata:
-            metadata["created_at"] = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+            metadata["created_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         if "version" not in metadata:
             metadata["version"] = self.VERSION
 

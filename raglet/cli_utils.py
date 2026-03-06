@@ -1,7 +1,7 @@
 """CLI utilities for consistent output formatting."""
 
 import sys
-from typing import Optional
+from typing import Optional, TextIO
 
 
 class Colors:
@@ -145,7 +145,7 @@ class CLIOutput:
         if not self.quiet:
             print(self._colorize(f"  {message}", Colors.CYAN), file=sys.stdout)
 
-    def print(self, message: str, file: Optional[sys.stdout] = None) -> None:
+    def print(self, message: str, file: Optional[TextIO] = None) -> None:
         """Print raw message.
 
         Args:
