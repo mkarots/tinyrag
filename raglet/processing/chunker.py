@@ -7,6 +7,9 @@ from raglet.config.config import ChunkingConfig
 from raglet.core.chunk import Chunk
 from raglet.processing.interfaces import Chunker
 
+# Pre-compile regex for sentence splitting (performance optimization)
+_SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
+
 
 class SentenceAwareChunker(Chunker):
     """Chunks text with sentence-aware strategy."""
@@ -97,8 +100,7 @@ class SentenceAwareChunker(Chunker):
         """
         # Simple sentence splitting (can be improved)
         # Split on sentence endings followed by space or newline
-        pattern = r"(?<=[.!?])\s+"
-        sentences = re.split(pattern, text)
+        sentences = _SENTENCE_SPLIT_RE.split(text)
 
-        # Filter empty sentences
-        return [s.strip() for s in sentences if s.strip()]
+        # Filter empty sentences (using walrus operator to avoid double strip())
+        return [stripped for s in sentences if (stripped := s.strip())]
