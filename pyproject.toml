@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "raglet"
-version = "0.2.0"
+version = "0.1.0"
 description = "Portable memory for small text corpora - create searchable .raglet files"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -33,9 +33,9 @@ classifiers = [
 dependencies = [
     "numpy>=1.24.0",
     "sentence-transformers>=2.2.0",
+    "torch>=1.11.0",
     "faiss-cpu>=1.7.4",
     "tqdm>=4.67.0",
-    "memory-profiler>=0.61.0",
 ]
 
 [project.scripts]
@@ -52,6 +52,7 @@ dev = [
     "types-PyYAML>=6.0.0",
     "build>=1.0.0",
     "twine>=4.0.0",
+    "memory-profiler>=0.61.0",
 ]
 config = [
     "pyyaml>=6.0",
