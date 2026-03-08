@@ -20,6 +20,9 @@ See [decisions/README.md](decisions/README.md) for all architectural decisions.
 ### Problems
 - [Problem Statement](problems/00-problem-statement.md) - Why raglet exists (from WHY.md)
 
+### Scale & Performance
+- [Bottlenecks at Scale](BOTTLENECKS_AT_SCALE.md) - Memory, CPU, and I/O bottlenecks at ~1M chunks
+
 ## Root Documentation
 
 - **ARCHITECTURE.md** - SOLID architecture and component design

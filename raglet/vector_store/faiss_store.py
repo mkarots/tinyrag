@@ -48,12 +48,10 @@ class FAISSVectorStore(VectorStore):
                 f"store dimension ({self.embedding_dim})"
             )
 
-        # Ensure vectors are float32 and contiguous (FAISS requirement)
-        vectors = np.ascontiguousarray(vectors.astype(np.float32))
+        if vectors.dtype != np.float32 or not vectors.flags['C_CONTIGUOUS']:
+            vectors = np.asarray(vectors, dtype=np.float32, order='C')
 
-        # Normalize vectors for cosine similarity (IndexFlatIP)
         faiss.normalize_L2(vectors)
-
         self.index.add(vectors)
         self.chunks.extend(chunks)
 
@@ -78,7 +76,10 @@ class FAISSVectorStore(VectorStore):
             )
 
         # Ensure query is float32 and contiguous
-        query_vector = np.ascontiguousarray(query_vector.astype(np.float32)).reshape(1, -1)
+        # Only copy if necessary (dtype mismatch or not C-contiguous)
+        if query_vector.dtype != np.float32 or not query_vector.flags['C_CONTIGUOUS']:
+            query_vector = np.asarray(query_vector, dtype=np.float32, order='C')
+        query_vector = query_vector.reshape(1, -1)
 
         # Normalize query vector for cosine similarity (IndexFlatIP)
         faiss.normalize_L2(query_vector)
@@ -116,3 +117,28 @@ class FAISSVectorStore(VectorStore):
             Number of vectors in the store
         """
         return int(self.index.ntotal)
+
+    def get_all_vectors(self) -> np.ndarray:
+        """Retrieve all indexed vectors from the FAISS index.
+
+        Uses ``index.reconstruct_n()`` to bulk-read vectors directly from
+        the C++ index without keeping a Python-side copy.
+
+        Returns:
+            Contiguous float32 array of shape (ntotal, embedding_dim).
+            Empty (0, embedding_dim) array when the index is empty.
+        """
+        n = int(self.index.ntotal)
+        if n == 0:
+            return np.empty((0, self.embedding_dim), dtype=np.float32)
+        return self.index.reconstruct_n(0, n)
+
+    def reset(self) -> None:
+        """Reset the vector store (clear all vectors and chunks).
+        
+        Useful for cleanup and preventing resource accumulation across iterations.
+        This explicitly clears the FAISS index, which may help with OpenMP thread cleanup.
+        """
+        # Create a new empty index (old one will be garbage collected)
+        self.index = faiss.IndexFlatIP(self.embedding_dim)
+        self.chunks.clear()

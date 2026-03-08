@@ -45,3 +45,17 @@ class VectorStore(ABC):
             Number of vectors in the store
         """
         pass
+
+    @abstractmethod
+    def get_all_vectors(self) -> np.ndarray:
+        """Retrieve all indexed vectors.
+
+        Returns a contiguous float32 array of shape ``(n_vectors, dim)``.
+        Implementations may reconstruct from the underlying index; callers
+        should not assume the returned array shares memory with the index.
+
+        Returns:
+            NumPy array of shape (n_vectors, embedding_dim), dtype float32.
+            Empty array with shape (0, dim) when the store is empty.
+        """
+        pass

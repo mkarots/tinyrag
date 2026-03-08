@@ -18,7 +18,8 @@ class TestEmbeddingConfig:
         config = EmbeddingConfig()
         assert config.model == "all-MiniLM-L6-v2"
         assert config.batch_size == 32
-        assert config.device == "cpu"
+        # Device is auto-detected, should be one of: cpu, cuda, mps
+        assert config.device in ["cpu", "cuda", "mps"]
         assert config.normalize is True  # Default changed to True for cosine similarity
 
     def test_validation_success(self):
@@ -43,6 +44,18 @@ class TestEmbeddingConfig:
         config = EmbeddingConfig(device="invalid")
         with pytest.raises(ValueError, match="device must be"):
             config.validate()
+
+    def test_validation_mps_device(self):
+        """Test validation accepts 'mps' device."""
+        config = EmbeddingConfig(device="mps")
+        config.validate()  # Should not raise
+
+    def test_device_auto_detection(self):
+        """Test that device is auto-detected when not specified."""
+        config = EmbeddingConfig()
+        # Device should be auto-detected to one of the valid options
+        assert config.device in ["cpu", "cuda", "mps"]
+        config.validate()  # Should not raise
 
 
 @pytest.mark.unit

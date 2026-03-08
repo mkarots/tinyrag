@@ -90,9 +90,8 @@ class TestModelValidation:
             with pytest.raises(ValueError, match="Embedding dimension mismatch"):
                 RAGlet.load(str(file_path))
 
-    def test_correct_dimension_works(self):
+    def test_correct_dimension_works(self, cached_embedding_generator, cached_raglet_config):
         """Test that correct dimension works fine."""
-        config = RAGletConfig(embedding=EmbeddingConfig(model="all-MiniLM-L6-v2"))  # 384 dims
         chunks = [
             Chunk(text="Test chunk", source="test.txt", index=0),
         ]
@@ -102,7 +101,8 @@ class TestModelValidation:
 
         raglet = RAGlet(
             chunks=chunks,
-            config=config,
+            config=cached_raglet_config,
+            embedding_generator=cached_embedding_generator,
             embeddings=correct_embeddings,
         )
 
