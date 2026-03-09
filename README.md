@@ -66,13 +66,13 @@ results = rag.search("your query")
 
 raglet is designed for workspace-scale corpora. The embedding pipeline processes ~95K LLM tokens/sec on Apple Silicon (MPS). Build is a one-time cost — after that, search stays under 11 ms regardless of dataset size.
 
-| Corpus size | Chunks | Build time (MPS) | Search p50 | raglet? |
-|-------------|--------|------------------|------------|---------|
-| < 8 KB | < 20 | — | — | Use a prompt directly |
-| 8 KB – 2 MB | 20 – 2,800 | < 7s | 3–6 ms | ✅ Sweet spot — builds in seconds |
-| 2 – 20 MB | 2,800 – 28,000 | 7s – 70s | 6–7 ms | ✅ Works great |
-| 20 – 100 MB | 28,000 – 139,000 | 70s – 6 min | 7–11 ms | ⚠️ Works — build is a one-time cost |
-| > 100 MB | > 139,000 | > 6 min | — | ❌ Use a vector database instead |
+| Corpus size | Chunks | ~Tokens | Build time (MPS) | Search p50 | raglet? |
+|-------------|--------|---------|------------------|------------|---------|
+| < 8 KB | < 20 | < 5K | — | — | Use a prompt directly |
+| 8 KB – 2 MB | 20 – 2,800 | 5K – 700K | < 7s | 3–6 ms | ✅ Sweet spot — builds in seconds |
+| 2 – 20 MB | 2,800 – 28,000 | 700K – 7M | 7s – 70s | 6–7 ms | ✅ Works great |
+| 20 – 100 MB | 28,000 – 139,000 | 7M – 36M | 70s – 6 min | 7–11 ms | ⚠️ Works — build is a one-time cost |
+| > 100 MB | > 139,000 | > 36M | > 6 min | — | ❌ Use a vector database instead |
 
 If your corpus is larger than ~100 MB, raglet is the wrong tool. Use a persistent vector database (Chroma, Weaviate, Pinecone) instead.
 
