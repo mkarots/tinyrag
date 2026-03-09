@@ -1,6 +1,6 @@
 """raglet - Portable memory for small text corpora."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from raglet.config.config import (
     ChunkingConfig,
