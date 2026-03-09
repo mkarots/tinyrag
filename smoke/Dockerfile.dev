@@ -7,10 +7,9 @@ COPY dist/*.whl /tmp/
 RUN pip install /tmp/*.whl && rm /tmp/*.whl
 
 # Pre-download the default embedding model so smoke tests run offline.
-ARG HF_TOKEN=""
-ENV HF_TOKEN=${HF_TOKEN}
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
-ENV HF_TOKEN=""
+# HF_TOKEN is mounted as a secret to avoid baking it into image layers.
+RUN --mount=type=secret,id=HF_TOKEN,env=HF_TOKEN \
+    python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
 COPY smoke/main.py .
 COPY smoke/gates/ gates/

@@ -34,6 +34,7 @@ jobs:
           tags: raglet-smoke:test
           build-args: |
             PYTHON_VERSION=${{ inputs.python_version || '3.11' }}
+          secrets: |
             HF_TOKEN=${{ secrets.HF_TOKEN }}
 
       - name: Run smoke tests
