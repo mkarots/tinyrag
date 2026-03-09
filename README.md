@@ -64,15 +64,15 @@ results = rag.search("your query")
 
 ## When to use raglet
 
-raglet is designed for workspace-scale corpora. The embedding pipeline processes ~95K LLM tokens/sec on Apple Silicon (MPS). Build is a one-time cost — after that, search stays under 15 ms regardless of dataset size.
+raglet is designed for workspace-scale corpora. The embedding pipeline processes ~95K LLM tokens/sec on Apple Silicon (MPS). Build is a one-time cost — after that, search stays under 11 ms regardless of dataset size.
 
-| Corpus size | LLM tokens | Build time (MPS) | Search p50 | raglet? |
-|-------------|------------|------------------|------------|---------|
-| < 8 KB | < 10K | — | — | Use a prompt directly |
-| 8 KB – 1 MB | 10K – 262K | ~3.5s | ~4 ms | ✅ Sweet spot |
-| 1 – 10 MB | 262K – 2.6M | 3.5–35s | ~6 ms | ✅ Works great |
-| 10 – 100 MB | 2.6M – 26M | 35s – 6 min | ~10 ms | ⚠️ Works — build is a one-time cost |
-| > 100 MB | > 26M | hours | — | ❌ Use a vector database instead |
+| Corpus size | Chunks | Build time (MPS) | Search p50 | raglet? |
+|-------------|--------|------------------|------------|---------|
+| < 8 KB | < 20 | — | — | Use a prompt directly |
+| 8 KB – 2 MB | 20 – 2,800 | < 7s | 3–6 ms | ✅ Sweet spot — builds in seconds |
+| 2 – 20 MB | 2,800 – 28,000 | 7s – 70s | 6–7 ms | ✅ Works great |
+| 20 – 100 MB | 28,000 – 139,000 | 70s – 6 min | 7–11 ms | ⚠️ Works — build is a one-time cost |
+| > 100 MB | > 139,000 | > 6 min | — | ❌ Use a vector database instead |
 
 If your corpus is larger than ~100 MB, raglet is the wrong tool. Use a persistent vector database (Chroma, Weaviate, Pinecone) instead.
 
@@ -269,7 +269,7 @@ results = rag.search("query", top_k=10, similarity_threshold=0.7)
 
 **File formats:** v0.1.0 supports `.txt` and `.md` files only. PDF, DOCX, and HTML are on the roadmap. For unsupported formats, extract text first and use `add_text()`.
 
-**Corpus size:** raglet is workspace-scale, not internet-scale. Search stays under 15 ms up to 100 MB, but build time becomes significant (100 MB takes ~6 minutes on MPS). Above ~100 MB, use a proper vector database.
+**Corpus size:** raglet is workspace-scale, not internet-scale. Search stays under 11 ms up to 100 MB (measured: 10.4 ms p50 at 139K chunks), but build time scales linearly (100 MB takes ~6 minutes on MPS). Above ~100 MB, use a proper vector database.
 
 **No file change detection:** raglet does not watch for file changes. If a file is modified, rebuild from scratch with `from_files()`. Incremental updates (`add_file`, `add_files`) are for adding new files only.
 
@@ -306,11 +306,27 @@ results = rag.search("query", top_k=10, similarity_threshold=0.7)
 
 ## Roadmap
 
-```
-v0.1.0 (now)   Semantic search, save/load, incremental updates, CLI
-v0.2.0         PDF, DOCX, HTML support
-v0.3.0         File change detection (rebuild only changed files)
-```
+**v0.1.0 (current)** — Semantic search, save/load, incremental updates, CLI
+
+**v0.2.0** — PDF, DOCX, HTML extraction
+
+**v0.3.0** — File change detection (rebuild only modified files)
+
+**Planned** (unscheduled)
+
+- Semantic chunking — split on topic boundaries using embeddings, not just sentence boundaries
+- Metadata filtering — `rag.search("query", source="docs/")` to narrow results by directory or file
+- `.ragletignore` — project-level ignore file alongside the `--ignore` CLI flag
+- JSON output for `raglet query` — pipe results to other tools
+- ONNX runtime — lightweight inference without PyTorch for smaller installs and faster cold starts
+- Workspace limits enforcement — soft/hard chunk count limits with actionable error messages ([ADR 010](docs/decisions/010-workspace-scale-limits.md))
+
+**Not planned** (out of scope by design)
+
+- LLM integration — raglet is retrieval only; bring your own LLM
+- Cloud/API backends — everything runs locally
+- Real-time file watching — use `add_file()` or rebuild explicitly
+- Datasets larger than ~100 MB — use a vector database instead
 
 ---
 

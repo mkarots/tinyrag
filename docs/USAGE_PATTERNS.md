@@ -6,17 +6,17 @@ raglet has an asymmetric performance profile: **building is slow, searching is i
 
 ## Performance profile
 
-Measured on Apple Silicon (MPS) with `all-MiniLM-L6-v2`, 10 MB of text (~5,800 chunks):
+Measured on Apple Silicon (MPS fp16) with `all-MiniLM-L6-v2`, chunk_size=256:
 
-| Operation | Time | Scales with |
-|-----------|------|-------------|
-| `from_files()` (initial build) | ~5s (MPS) / ~27s (CPU) | Total text size |
-| `search()` | 6–25 ms | Constant (FAISS indexed) |
-| `save()` | 50–85 ms | Total chunks |
-| `load()` | 30–40 ms | Total chunks |
-| `add_text()` / `add_file()` | Proportional to new text only | New text size |
+| Operation | 1 MB (1.4K chunks) | 10 MB (14K chunks) | 100 MB (139K chunks) | Scales with |
+|-----------|-------------------:|-------------------:|---------------------:|-------------|
+| `from_files()` (build) | 3.6s | 35s | 6 min | Total text size |
+| `search()` | 3.7 ms | 6.3 ms | 10.4 ms | Slowly with chunk count |
+| `save()` | 12 ms | 122 ms | 1.2s | Total chunks |
+| `load()` | 10 ms | 51 ms | 574 ms | Total chunks |
+| `add_text()` / `add_file()` | Proportional to new text only | — | — | New text size |
 
-The initial build is a one-time cost. After that, every operation is fast.
+The initial build is a one-time cost. After that, every operation is fast. Embedding throughput plateaus at ~395 chunks/s (~95K LLM tokens/s) on MPS.
 
 ---
 
