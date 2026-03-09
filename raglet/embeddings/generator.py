@@ -103,14 +103,20 @@ class SentenceTransformerGenerator(EmbeddingGenerator):
                 # First time loading this (model, device, precision, compile) combination
                 self._warn_model_loading(config.model)
                 try:
-                    # Use local_files_only=True to skip HuggingFace Hub network calls.
-                    # This saves ~1-2s on every run by avoiding hf_hub_download/metadata checks.
-                    # If the model isn't locally cached it will raise immediately rather than hanging.
-                    model = SentenceTransformer(
-                        config.model,
-                        device=config.device,
-                        local_files_only=True,
-                    )
+                    # Try local cache first to skip HuggingFace Hub network calls
+                    # (~1-2s faster). Falls back to a network download if the model
+                    # hasn't been cached yet (e.g. first run in CI).
+                    try:
+                        model = SentenceTransformer(
+                            config.model,
+                            device=config.device,
+                            local_files_only=True,
+                        )
+                    except Exception:
+                        model = SentenceTransformer(
+                            config.model,
+                            device=config.device,
+                        )
 
                     # --- float16 half-precision ---
                     # Converting weights to fp16 halves memory bandwidth pressure and
