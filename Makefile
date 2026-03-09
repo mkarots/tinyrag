@@ -1,4 +1,4 @@
-.PHONY: help install install-dev test test-unit test-integration test-e2e test-performance lint format format-check type-check coverage coverage-ci clean build dist publish publish-test ci venv check-uv benchmark benchmark-sweep benchmark-report docker-build docker-push docker-release smoke smoke-dev
+.PHONY: help install install-dev test test-unit test-integration test-e2e test-performance lint format format-check type-check coverage coverage-ci clean build dist publish publish-test ci venv check-uv benchmark benchmark-quick benchmark-sweep benchmark-report docker-build docker-push docker-release smoke smoke-dev
 
 
 # Check if uv is available (checks at runtime, works even if uv was installed after Makefile was parsed)
@@ -20,6 +20,7 @@ help:
 	@echo "  test-e2e        - Run end-to-end tests only"
 	@echo "  test-performance - Run storage format performance tests"
 	@echo "  benchmark       - Run embedding throughput benchmark"
+	@echo "  benchmark-quick - Run embedding + latency benchmarks (small sizes, fast)"
 	@echo "  benchmark-sweep - Run all benchmarks with parameter sweeps (YAML config)"
 	@echo "  benchmark-report - Generate markdown benchmark report from results JSON"
 	@echo "  lint            - Run linters (ruff)"
@@ -114,6 +115,18 @@ test-performance-local: check-uv
 benchmark: check-uv
 	@echo "Running embedding throughput benchmark..."
 	uv run python benchmarks/embedding-throughput/run.py
+
+benchmark-quick: check-uv
+	@echo "Running quick benchmarks (sizes up to 2 MB)..."
+	uv run python benchmarks/embedding-throughput/run.py \
+		--runs 2 \
+		--sizes 0.005 0.05 0.5 2.0
+	uv run python benchmarks/latency/run.py \
+		--runs 5 \
+		--sizes 0.005 0.05 0.5 2.0
+	@echo ""
+	@echo "Generating report..."
+	uv run python benchmarks/report.py
 
 # Sweep: run benchmarks with parameter grids from YAML config
 # Usage: make benchmark-sweep
